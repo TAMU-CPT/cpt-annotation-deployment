@@ -1,0 +1,22 @@
+version: '2'
+services:
+
+    proxy: ## initial proxy
+
+    remoteuser: ## Remote user Proxy for Galaxy Auth to Apollo Auth (gx-cookie-proxy)
+        image: "quay.io/erasche/gx-cookie-proxy:latest"
+        environment:
+            GALAXY_DB_URL: "<db_url_here>"
+            GALAXY_SECRET: "supersecret"
+            GXC_BACKEND_URL: "target:8080"
+            GXC_LOGLEVEL: DEBUG
+        links:
+            - apollo:target
+    
+    apollo: ## Apollo service image
+        image: "quay.io/tamu_cpt/docker-apollo:cpt"
+        links:
+            - "apollo_db"
+        volumes:
+            - "./apollo-config.groovy"
+
