@@ -1,18 +1,23 @@
-version: '2'
+version: '3'
 services:
 
-    proxy: ## initial proxy
 
-    remoteuser: ## Remote user Proxy for Galaxy Auth to Apollo Auth (gx-cookie-proxy)
-        image: "quay.io/erasche/gx-cookie-proxy:latest"
+    apollo_db: ## postgres DB for Apollo
+        image: postgres:9.5
+        environment: 
+            POSTGRES_PASSWORD: changeinprod
+        volumes:
+            - "./volumes/apollo:/var/lib/postgresql/data/"
+
+    chado_db: ## postgres DB for chado
+        image: quay.io/galaxy-genome-annotation/chado:1.31-jenkins21-pg9.5
         environment:
-            GALAXY_DB_URL: "<db_url_here>"
-            GALAXY_SECRET: "supersecret"
-            GXC_BACKEND_URL: "target:8080"
-            GXC_LOGLEVEL: DEBUG
-        links:
-            - apollo:target
-    
+            POSTGRES_PASSWORD: changeinprod
+            INSTALL_CHADO_SCHEMA: 1
+            INSTALL_YEAST_DATA: 0
+        volumes:
+            - "./volumes/chado/db:/var/lib/postgresql/data/"
+
     apollo: ## Apollo service image
         image: "quay.io/tamu_cpt/docker-apollo:cpt"
         links:
@@ -20,3 +25,20 @@ services:
         volumes:
             - "./apollo-config.groovy"
 
+#    proxy: ## initial proxy
+
+#    remoteuser: ## Remote user Proxy for Galaxy Auth to Apollo Auth (gx-cookie-proxy)
+#        image: "quay.io/erasche/gx-cookie-proxy:latest"
+#        environment:
+#            GALAXY_DB_URL: "<db_url_here>"
+#            GALAXY_SECRET: "supersecret"
+#            GXC_BACKEND_URL: "target:8080"
+#            GXC_LOGLEVEL: DEBUG
+#        links:
+#            - apollo:target
+
+
+#    jbrowse: 
+#        image: quay.io/galaxy-genome-annotation/jbrowse:v1.12.5
+#        volumes_from:
+#            - "galaxy:ro"
